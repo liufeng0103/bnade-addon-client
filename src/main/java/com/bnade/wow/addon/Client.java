@@ -64,6 +64,16 @@ public class Client {
         }
     }
 
+    /**
+     * 判断是否为正确的魔兽世界安装目录
+     * @param wowDir
+     * @return
+     */
+    public boolean isCorrectWowDir(String wowDir) {
+
+        return false;
+    }
+
     public static void main(String[] args) throws IOException {
         Client client = new Client();
 //        client.updateAddon();
