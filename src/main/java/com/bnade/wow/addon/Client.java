@@ -2,30 +2,71 @@ package com.bnade.wow.addon;
 
 import com.google.gson.Gson;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Created by liufeng0103 on 8/17/2016.
  */
 public class Client {
 
+    private String wowDir = "K:\\WOWClient";
+    private static final String ADDONS_DIR = "/Interface/AddOns";
+    private HttpClient httpClient;
+
     public Client() {
+        httpClient = new HttpClient();
     }
 
-    public String getLocalVersion() {
-        return "";
+    /**
+     * 获取插件版本
+     * @return
+     * @throws IOException
+     */
+    public String getLocalVersion() throws IOException {
+        String content = IOUtils.inputStreamToString(new FileInputStream(wowDir + ADDONS_DIR + "/Bnade/Data.lua"));
+        String startStr = "[\"updated\"]=\"";
+        String endStr = "\",";
+        return content.substring(content.indexOf(startStr) + startStr.length(), content.indexOf(endStr));
     }
 
+    /**
+     * 获取全程插件版本
+     * @return
+     * @throws IOException
+     */
     public String getVersion() throws IOException {
-        HttpClient httpClient = new HttpClient();
         String versionStr = httpClient.get("http://www.bnade.com/wow/addon/version");
         Gson gson = new Gson();
         Addon addon = gson.fromJson(versionStr, Addon.class);
         return addon.getVersion();
     }
 
-    public void updateAddon() {
-
+    /**
+     * 下载并更新本地插件
+     * @throws IOException
+     */
+    public void updateAddon() throws IOException {
+        HttpURLConnection con = httpClient.getConnection("http://www.bnade.com/Bnade.zip");
+        try (InputStream is = con.getInputStream()) {
+            IOUtils.extractAllFromInputStream(is, wowDir + ADDONS_DIR);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
     }
 
+    public static void main(String[] args) throws IOException {
+        Client client = new Client();
+//        client.updateAddon();
+        System.out.println(client.getLocalVersion());
+    }
 }

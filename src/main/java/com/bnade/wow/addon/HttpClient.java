@@ -1,9 +1,9 @@
 package com.bnade.wow.addon;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -27,22 +27,23 @@ public class HttpClient {
      */
     public String get(String url) throws IOException {
         String content = "";
-        HttpURLConnection con = null;
-        try {
-            con = (HttpURLConnection) new URL(url).openConnection();
-            con.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-            con.setConnectTimeout(connectionTimeout);
-            con.setReadTimeout(readTimeout);
-            // 参考http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string, 这种方式转化inputStream到String效率最高
-            try (InputStream is = con.getInputStream(); ) {
-                content = IOUtils.inputStreamToString(is);
-            }
+        HttpURLConnection con = getConnection(url);
+        try (InputStream is = con.getInputStream())  {
+            content = IOUtils.inputStreamToString(is);
         } finally {
             if (con != null) {
                 con.disconnect();
             }
         }
         return content;
+    }
+
+    public HttpURLConnection getConnection(String url) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+        con.setConnectTimeout(connectionTimeout);
+        con.setReadTimeout(readTimeout);
+        return con;
     }
 
     public static void main(String[] args) throws IOException {
