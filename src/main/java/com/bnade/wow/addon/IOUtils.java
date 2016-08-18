@@ -34,7 +34,7 @@ public class IOUtils {
             while (ze != null) {
                 String fileName = ze.getName();
                 File newFile = new File(outputFolder + File.separator + fileName);
-                System.out.println("file unzip : "+ newFile.getAbsoluteFile());
+//                System.out.println("file unzip : "+ newFile.getAbsoluteFile());
                 new File(newFile.getParent()).mkdirs();
                 if (ze.isDirectory()) {
                     newFile.mkdir();

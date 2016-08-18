@@ -4,3 +4,4 @@ gradle
 addon-client.iml
 gradlew
 gradlew.bat
+target

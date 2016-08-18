@@ -1,7 +1,5 @@
 package com.bnade.wow.addon;
 
-import jdk.internal.util.xml.impl.Input;
-
 import java.io.*;
 import java.util.Properties;
 

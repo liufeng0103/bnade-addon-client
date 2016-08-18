@@ -2,15 +2,11 @@ package com.bnade.wow.addon;
 
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 /**
  * Created by liufeng0103 on 8/17/2016.
@@ -66,11 +62,17 @@ public class Client {
 
     /**
      * 判断是否为正确的魔兽世界安装目录
-     * @param wowDir
+     * @param wowDirPath
      * @return
      */
-    public boolean isCorrectWowDir(String wowDir) {
-
+    public boolean isCorrectWowDir(String wowDirPath) {
+        File wowDir = new File(wowDirPath);
+        for (File file : wowDir.listFiles()) {
+//            System.out.println(file.getName());
+            if ("World of Warcraft Launcher.exe".equals(file.getName())) {
+                return true;
+            }
+        }
         return false;
     }
 
