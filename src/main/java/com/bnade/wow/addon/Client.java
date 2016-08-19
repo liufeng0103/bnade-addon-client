@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
  */
 public class Client {
 
-    private String wowDir = "K:\\WOWClient";
     private static final String ADDONS_DIR = "/Interface/AddOns";
     private HttpClient httpClient;
 
@@ -27,10 +26,16 @@ public class Client {
      * @throws IOException
      */
     public String getLocalVersion() throws IOException {
-        String content = IOUtils.inputStreamToString(new FileInputStream(wowDir + ADDONS_DIR + "/Bnade/Data.lua"));
-        String startStr = "[\"updated\"]=\"";
-        String endStr = "\",";
-        return content.substring(content.indexOf(startStr) + startStr.length(), content.indexOf(endStr));
+        String version = "";
+        String wowDir = ClientProperties.getKeyValue("wowDir");
+        File file = new File(wowDir + ADDONS_DIR + "/Bnade/Data.lua");
+        if (file.exists()) {
+            String content = IOUtils.inputStreamToString(new FileInputStream(file));
+            String startStr = "[\"updated\"]=\"";
+            String endStr = "\",";
+            version = content.substring(content.indexOf(startStr) + startStr.length(), content.indexOf(endStr));
+        }
+        return version;
     }
 
     /**
@@ -52,6 +57,8 @@ public class Client {
     public void updateAddon() throws IOException {
         HttpURLConnection con = httpClient.getConnection("http://www.bnade.com/Bnade.zip");
         try (InputStream is = con.getInputStream()) {
+            String wowDir = ClientProperties.getKeyValue("wowDir");
+            new File(wowDir + ADDONS_DIR).mkdirs();
             IOUtils.extractAllFromInputStream(is, wowDir + ADDONS_DIR);
         } finally {
             if (con != null) {
