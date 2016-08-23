@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
 /**
  * Created by luis on 8/18/2016.
@@ -99,8 +100,18 @@ public class ClientGui extends JFrame {
 //                        System.out.println(remoteVersion);
                         if (!remoteVersion.equals(version)) {
                             msgLab.setText("正在更新，请稍等...");
-                            client.updateAddon();
-                            msgLab.setText("更新完毕，数据日期：" + remoteVersion);
+                            SwingUtilities.invokeLater(() -> {
+                                try {
+                                    updateAddonBtn.setEnabled(false);
+                                    client.updateAddon();
+                                    msgLab.setText("更新完毕，数据日期：" + remoteVersion);
+                                } catch (IOException e1) {
+                                    showErrorMessage("更新插件时出错，错误原因：\n" + e1.getMessage());
+                                    e1.printStackTrace();
+                                } finally {
+                                    updateAddonBtn.setEnabled(true);
+                                }
+                            });
                         } else {
                             msgLab.setText("已是最新版本，数据日期：" + remoteVersion);
                         }
@@ -135,77 +146,91 @@ public class ClientGui extends JFrame {
 class TSMAppDataGui extends JFrame {
 
     public TSMAppDataGui(JTextField wowDirTxt) {
-        setTitle("TSM插件的数据更新");
-        setSize(500, 70);
-        setResizable(false);
+        try {
+            setTitle("TSM插件的数据更新");
+            setSize(500, 85);
+            setResizable(false);
 
-        Client client = new Client();
+            Client client = new Client();
 
-        JTextField realmTxt = new JTextField(10);
-        if (ClientProperties.getKeyValue("realm") != null) {
-            realmTxt.setText(ClientProperties.getKeyValue("realm"));
-        }
-        JButton updateBtn = new JButton("开始更新");
-        JLabel msgLab = new JLabel();
+            JTextField realmTxt = new JTextField(10);
+            if (ClientProperties.getKeyValue("realm") != null) {
+                realmTxt.setText(ClientProperties.getKeyValue("realm"));
+            }
+            JButton updateBtn = new JButton("开始更新");
+            JLabel msgLab = new JLabel();
 
-        //TradeSkillMaster_AppHelper
-        JPanel elePanel = new JPanel();
-        elePanel.add(new JLabel("服务器:"));
-        elePanel.add(realmTxt);
-        elePanel.add(updateBtn);
-        elePanel.add(msgLab);
-        JPanel layout = new JPanel(new BorderLayout());
-        layout.add(elePanel, BorderLayout.WEST);
+            //TradeSkillMaster_AppHelper
+            JPanel elePanel = new JPanel();
+            elePanel.add(new JLabel("服务器:"));
+            elePanel.add(realmTxt);
+            elePanel.add(updateBtn);
+            elePanel.add(msgLab);
+            JPanel layout = new JPanel(new BorderLayout());
+            layout.add(new JLabel("本功能还不太完善，有条件的推荐使用游戏内的完整扫描"), BorderLayout.NORTH);
+            layout.add(elePanel, BorderLayout.WEST);
 
-        add(layout);
-
-        //
-        updateBtn.addActionListener((ActionEvent e) -> {
-            String wowDir = wowDirTxt.getText();
-            if ("".equals(wowDir)) {
-                msgLab.setText("请先选择魔兽世界安装目录");
-            } else {
-                if (client.isCorrectWowDir(wowDir)) {
-                    if (client.isTradeSkillMasterAppHelperInstalled()) {
-                        String realm = realmTxt.getText();
-                        Integer realmId = Realm.getIdByName(realm);
-                        if (realmId != null) {
-                            try {
-                                ClientProperties.setKeyValue("realm", realm);
-                            } catch (IOException e1) {
-                                showErrorMessage("错误:" + e1.getMessage());
-                                e1.printStackTrace();
-                            }
-                            try {
-                                if (!client.getTSMAppDataVersion(realmId).equals(client.getLocalTSMAppDataVersion())) {
-                                    msgLab.setText("正在下载数据，请稍等...");
-                                    HttpClient httpClient = new HttpClient();
-                                    String content = httpClient.get("http://www.bnade.com/appData/" + realmId + ".lua").replace("{xxrealmxx}", realm);
-//                                    System.out.println(content);
-                                    IOUtils.stringToFile(content, wowDir + Client.ADDONS_DIR + "/TradeSkillMaster_AppHelper/AppData.lua");
-                                    msgLab.setText("数据更新完毕");
-                                } else {
-                                    msgLab.setText("已是最新数据");
+            add(layout);
+            //
+            updateBtn.addActionListener((ActionEvent e) -> {
+                String wowDir = wowDirTxt.getText();
+                if ("".equals(wowDir)) {
+                    msgLab.setText("请先选择魔兽世界安装目录");
+                } else {
+                    if (client.isCorrectWowDir(wowDir)) {
+                        if (client.isTradeSkillMasterAppHelperInstalled()) {
+                            String realm = realmTxt.getText();
+                            Integer realmId = Realm.getIdByName(realm);
+                            if (realmId != null) {
+                                try {
+                                    ClientProperties.setKeyValue("realm", realm);
+                                } catch (IOException e1) {
+                                    showErrorMessage("错误:" + e1.getMessage());
+                                    e1.printStackTrace();
                                 }
-                            } catch (IOException e1) {
-                                showErrorMessage("错误:" + e1.getMessage());
-                                e1.printStackTrace();
+                                try {
+                                    if (!client.getTSMAppDataVersion(realmId).equals(client.getLocalTSMAppDataVersion())) {
+                                        msgLab.setText("正在下载数据，请稍等...");
+                                        SwingUtilities.invokeLater(() -> {
+                                            HttpClient httpClient = new HttpClient();
+                                            String content = null;
+                                            try {
+                                                updateBtn.setEnabled(false);
+                                                content = httpClient.get("http://www.bnade.com/appData/" + realmId + ".lua").replace("{xxrealmxx}", realm);
+                                                IOUtils.stringToFile(content, wowDir + Client.ADDONS_DIR + "/TradeSkillMaster_AppHelper/AppData.lua");
+                                                msgLab.setText("数据更新完毕");
+                                            } catch (IOException e1) {
+                                                showErrorMessage("错误:" + e1.getMessage());
+                                                e1.printStackTrace();
+                                            } finally {
+                                                updateBtn.setEnabled(true);
+                                            }
+                                        });
+                                    } else {
+                                        msgLab.setText("已是最新数据");
+                                    }
+                                } catch (IOException e1) {
+                                    showErrorMessage("错误:" + e1.getMessage());
+                                    e1.printStackTrace();
+                                }
+                            } else {
+                                msgLab.setText("找不到服务器：" + realm);
                             }
                         } else {
-                            msgLab.setText("找不到服务器：" + realm);
+                            msgLab.setText("请先安装TradeSkillMaster_AppHelper插件");
                         }
                     } else {
-                        msgLab.setText("请先安装TradeSkillMaster_AppHelper插件");
+                        msgLab.setText("魔兽世界安装目录不正确");
                     }
-                } else {
-                    msgLab.setText("魔兽世界安装目录不正确");
                 }
-            }
-        });
+            });
 
-        SwingUtils.updateUILookAndFeel(JOptionPane.getRootFrame());
-        SwingUtils.showOnScreenCenter(this);
-        SwingUtils.updateUILookAndFeel(this);
+            SwingUtils.updateUILookAndFeel(JOptionPane.getRootFrame());
+            SwingUtils.showOnScreenCenter(this);
+            SwingUtils.updateUILookAndFeel(this);
+        } catch(Exception e1) {
+            showErrorMessage("更新TSM插件数据时出错，错误原因：\n" + e1.getMessage());
+        }
     }
 
     private void showErrorMessage(String msg) {

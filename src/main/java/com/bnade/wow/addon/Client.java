@@ -67,7 +67,11 @@ public class Client {
             String content = IOUtils.inputStreamToString(new FileInputStream(file));
             String startStr = "downloadTime=";
             String endStr = ",fields";
-            version = content.substring(content.indexOf(startStr) + startStr.length(), content.indexOf(endStr));
+            int start = content.indexOf(startStr);
+            int end = content.indexOf(endStr);
+            if (start > 0 && end > 0) {
+                version = content.substring(start + startStr.length(), end);
+            }
         }
         return version;
     }
