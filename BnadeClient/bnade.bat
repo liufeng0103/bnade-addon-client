@@ -12,4 +12,4 @@ pause
 exit
 
 :init
-start javaw -cp res/* com.bnade.wow.addon.ClientGui
+start javaw -cp ./res/addon-client.jar;./res/gson-2.5.jar com.bnade.wow.addon.ClientGui

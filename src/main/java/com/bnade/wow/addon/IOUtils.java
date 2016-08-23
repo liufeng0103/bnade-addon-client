@@ -51,4 +51,10 @@ public class IOUtils {
         }
     }
 
+    public static void stringToFile(String str, String path) throws IOException {
+        try (PrintWriter out = new PrintWriter(path)) {
+            out.println(str);
+        }
+    }
+
 }

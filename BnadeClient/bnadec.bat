@@ -12,4 +12,5 @@ pause
 exit
 
 :init
-java -cp res/* com.bnade.wow.addon.ClientGui
+@echo on
+java -cp ./res/addon-client.jar;./res/gson-2.5.jar com.bnade.wow.addon.ClientGui

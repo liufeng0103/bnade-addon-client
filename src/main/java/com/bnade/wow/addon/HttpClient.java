@@ -1,5 +1,7 @@
 package com.bnade.wow.addon;
 
+import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

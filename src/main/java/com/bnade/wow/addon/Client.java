@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
  */
 public class Client {
 
-    private static final String ADDONS_DIR = "/Interface/AddOns";
+    public static final String ADDONS_DIR = "/Interface/AddOns";
     private HttpClient httpClient;
 
     public Client() {
@@ -39,12 +39,46 @@ public class Client {
     }
 
     /**
-     * 获取全程插件版本
+     * 获取远程插件版本
      * @return
      * @throws IOException
      */
     public String getVersion() throws IOException {
         String versionStr = httpClient.get("http://www.bnade.com/wow/addon/version");
+        Gson gson = new Gson();
+        Addon addon = gson.fromJson(versionStr, Addon.class);
+        return addon.getVersion();
+    }
+
+    public boolean isTradeSkillMasterAppHelperInstalled() {
+        return new File(ClientProperties.getKeyValue("wowDir") + ADDONS_DIR + "/TradeSkillMaster_AppHelper").exists();
+    }
+
+    /**
+     * 获取本地TSM插件数据版本
+     * @return
+     * @throws IOException
+     */
+    public String getLocalTSMAppDataVersion() throws IOException {
+        String version = "";
+        String wowDir = ClientProperties.getKeyValue("wowDir");
+        File file = new File(wowDir + ADDONS_DIR + "/TradeSkillMaster_AppHelper/AppData.lua");
+        if (file.exists()) {
+            String content = IOUtils.inputStreamToString(new FileInputStream(file));
+            String startStr = "downloadTime=";
+            String endStr = ",fields";
+            version = content.substring(content.indexOf(startStr) + startStr.length(), content.indexOf(endStr));
+        }
+        return version;
+    }
+
+    /**
+     * 获取远程TSM插件数据版本
+     * @return
+     * @throws IOException
+     */
+    public String getTSMAppDataVersion(int realmId) throws IOException {
+        String versionStr = httpClient.get("http://www.bnade.com/wow/addon/tsm/"+realmId+"/version");
         Gson gson = new Gson();
         Addon addon = gson.fromJson(versionStr, Addon.class);
         return addon.getVersion();
@@ -87,5 +121,8 @@ public class Client {
         Client client = new Client();
 //        client.updateAddon();
         System.out.println(client.getLocalVersion());
+        System.out.println(client.getLocalTSMAppDataVersion());
+        System.out.println(client.isTradeSkillMasterAppHelperInstalled());
+
     }
 }
