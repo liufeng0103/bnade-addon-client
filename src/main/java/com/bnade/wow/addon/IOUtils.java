@@ -52,7 +52,7 @@ public class IOUtils {
     }
 
     public static void stringToFile(String str, String path) throws IOException {
-        try (PrintWriter out = new PrintWriter(path)) {
+        try (PrintWriter out = new PrintWriter(path, "utf-8")) {
             out.println(str);
         }
     }
