@@ -44,7 +44,7 @@ public class Client {
      * @throws IOException
      */
     public String getVersion() throws IOException {
-        String versionStr = httpClient.get("http://www.bnade.com/wow/addon/version");
+        String versionStr = httpClient.get("https://www.bnade.com/wow/addon/version", true);
         Gson gson = new Gson();
         Addon addon = gson.fromJson(versionStr, Addon.class);
         return addon.getVersion();
@@ -82,7 +82,7 @@ public class Client {
      * @throws IOException
      */
     public String getTSMAppDataVersion(int realmId) throws IOException {
-        String versionStr = httpClient.get("http://www.bnade.com/wow/addon/tsm/"+realmId+"/version");
+        String versionStr = httpClient.get("https://www.bnade.com/wow/addon/tsm/"+realmId+"/version", true);
         Gson gson = new Gson();
         Addon addon = gson.fromJson(versionStr, Addon.class);
         return addon.getVersion();
@@ -93,7 +93,7 @@ public class Client {
      * @throws IOException
      */
     public void updateAddon() throws IOException {
-        HttpURLConnection con = httpClient.getConnection("http://www.bnade.com/Bnade.zip");
+        HttpURLConnection con = httpClient.getConnection("https://www.bnade.com/Bnade.zip");
         try (InputStream is = con.getInputStream()) {
             String wowDir = ClientProperties.getKeyValue("wowDir");
             new File(wowDir + ADDONS_DIR).mkdirs();

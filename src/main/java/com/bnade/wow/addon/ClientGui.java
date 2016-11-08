@@ -196,7 +196,7 @@ class TSMAppDataGui extends JFrame {
                                             String content = null;
                                             try {
                                                 updateBtn.setEnabled(false);
-                                                content = httpClient.get("http://www.bnade.com/appData/" + realmId + ".lua").replace("{xxrealmxx}", realm);
+                                                content = httpClient.get("https://www.bnade.com/appData/" + realmId + ".lua").replace("{xxrealmxx}", realm);
                                                 IOUtils.stringToFile(content, wowDir + Client.ADDONS_DIR + "/TradeSkillMaster_AppHelper/AppData.lua");
                                                 msgLab.setText("数据更新完毕");
                                             } catch (IOException e1) {
